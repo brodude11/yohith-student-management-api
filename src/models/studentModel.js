@@ -101,28 +101,53 @@ const findCommonStudents = (teacherIds) => {
 // finding students who can receive notifications
 const findStudentsForNotification = (teacherId, emails) => {
     return new Promise((resolve, reject) => {
+        let query;
+        let parameters;
 
-        //this query retrieves students who are not suspended and are either registered with the given teacher or mentioned in the notification
-        //the LEFT JOIN connects students with the teacher_student relationship table so that can identify students assigned to the teacher 
-        //the OR condition allows students mentioned using their email address to also be included
-        
-        //DISTINCT is used to prevent duplicate results by ensuring each student only appears once even if the student satisfies multiple conditions 
-        //for example: being registered under the teacher and also mentioned in the notification
-        const query = `
-            SELECT DISTINCT students.email
-            FROM students
-            LEFT JOIN teacher_student
-            ON students.id = teacher_student.student_id
-            WHERE students.suspended = 0
-            AND (
-                teacher_student.teacher_id = ?
-                OR students.email IN (?)
-            )
-        `;
+        // if no students are mentioned in the notification, only retrieve the students registered under the teacher
+        if (emails.length === 0) {
+
+            //this query retrieves students who are not suspended and are registered with the given teacher
+            //the LEFT JOIN connects students with the teacher_student relationship table so that can identify students assigned to the teacher
+
+            //DISTINCT is used to prevent duplicate results by ensuring each student only appears once
+            const queryWithoutMentions = `
+                SELECT DISTINCT students.email
+                FROM students
+                LEFT JOIN teacher_student
+                ON students.id = teacher_student.student_id
+                WHERE students.suspended = 0
+                AND teacher_student.teacher_id = ?
+            `;
+            query = queryWithoutMentions;
+            parameters = [teacherId];
+
+        } else {
+            //this query retrieves students who are not suspended and are either registered with the given teacher or mentioned in the notification
+            //the LEFT JOIN connects students with the teacher_student relationship table so that can identify students assigned to the teacher
+
+            //the OR condition allows students mentioned using their email address to also be included
+
+            //DISTINCT is used to prevent duplicate results by ensuring each student only appears once even if the student satisfies multiple conditions
+            //for example: being registered under the teacher and also mentioned in the notification
+            const queryWithMentions = `
+                SELECT DISTINCT students.email
+                FROM students
+                LEFT JOIN teacher_student
+                ON students.id = teacher_student.student_id
+                WHERE students.suspended = 0
+                AND (
+                    teacher_student.teacher_id = ?
+                    OR students.email IN (?)
+                )
+            `;
+            query = queryWithMentions;
+            parameters = [teacherId, emails];
+        }
 
         db.query(
             query,
-            [teacherId, emails],
+            parameters,
             (error, results) => {
 
                 if (error) {
