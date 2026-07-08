@@ -9,8 +9,11 @@ The API allows teachers to:
 - Register one or more students
 - Retrieve students common to one or more teachers
 - Retrieve students who should receive a notification while excluding suspended students
+- Reset the database back to the original baseline data
 
 The application follows the MVC (Model-View-Controller) architecture to separate routing, business logic and database operations. Automated tests are included using Jest and Supertest.
+
+---
 
 ## Tech Stack
 
@@ -20,6 +23,8 @@ The application follows the MVC (Model-View-Controller) architecture to separate
 - Jest
 - Supertest
 - dotenv
+
+---
 
 ## Project Structure
 
@@ -43,36 +48,44 @@ tests
 └── student.test.js
 ```
 
+---
+
+## Prerequisites
+
+Before running the project, make sure you have the following installed:
+
+- Node.js
+- npm
+- MySQL Server
+
+---
+
 ## Getting Started
 
-### 1. Install the dependencies
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/brodude11/yohith-student-management-api.git
+cd yohith-student-management-api
+```
+
+### 2. Install the dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Create the database
-
-Create a MySQL database called:
-
-```sql
-CREATE DATABASE student_management;
-```
-
-Run the SQL scripts in the following order:
-
-1. `schema.sql`
-2. `seed.sql`
-
-Both files can be found in:
-
-```text
-src/database
-```
-
 ### 3. Configure the environment variables
 
-Create a `.env` file in the project root.
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Update the values if your local MySQL configuration is different.
+
+Example:
 
 ```env
 MYSQL_HOST=localhost
@@ -83,15 +96,43 @@ MYSQL_PORT=3306
 PORT=3000
 ```
 
-### 4. Start the application
+### 4. Set up the database
 
-Development mode
+Open MySQL:
+
+```bash
+mysql -u root
+```
+
+If you already have a `student_management` database from a previous setup, you can remove it first so that you start with a clean database.
+
+```sql
+DROP DATABASE student_management;
+```
+
+Create the database:
+
+```sql
+CREATE DATABASE student_management;
+USE student_management;
+```
+
+Create the tables and insert the baseline data:
+
+```sql
+SOURCE src/database/schema.sql;
+SOURCE src/database/seed.sql;
+```
+
+### 5. Start the application
+
+Development mode:
 
 ```bash
 npm run dev
 ```
 
-Production mode
+Production mode:
 
 ```bash
 npm start
@@ -103,15 +144,53 @@ The API runs on:
 http://localhost:3000
 ```
 
+---
+
 ## Running the Tests
 
-Run:
+Open another terminal while the application is running and execute:
 
 ```bash
 npm test
 ```
 
-The test suite automatically resets the database before every test so that each test starts with the same baseline data.
+The test suite automatically resets the database before each test run so that every test starts with the same baseline data.
+
+---
+
+## Verifying the Setup
+
+After starting the application, you can verify that everything has been set up correctly.
+
+Check that the API is running:
+
+```bash
+curl http://localhost:3000/
+```
+
+Expected response:
+
+```json
+{
+  "message": "Student Management API is running"
+}
+```
+
+You can also test one of the API endpoints:
+
+```bash
+curl "http://localhost:3000/api/commonstudents?teacher=teacherAlice@gmail.com"
+```
+
+Expected response:
+
+```json
+{
+  "students": ["studentAlan@gmail.com", "studentDon@gmail.com"]
+}
+```
+
+---
 
 ## API Endpoints
 
@@ -132,6 +211,8 @@ Example request:
 }
 ```
 
+---
+
 ### Retrieve Common Students
 
 ```
@@ -146,13 +227,15 @@ Example:
 GET /api/commonstudents?teacher=teacherAlice@gmail.com&teacher=teacherBob@gmail.com
 ```
 
+---
+
 ### Retrieve Notification Recipients
 
 ```
 POST /api/retrievefornotifications
 ```
 
-Returns all students who should receive the notification.
+Returns all students who are eligible to receive the notification.
 
 A recipient must:
 
@@ -169,6 +252,8 @@ Example request:
 }
 ```
 
+---
+
 ### Reset Database
 
 ```
@@ -177,15 +262,19 @@ GET /api/reset
 
 Restores the database to the original baseline data provided in the assessment. This endpoint is mainly used during development and automated testing.
 
+---
+
 ## Design Decisions
 
-A few design decisions were made while developing this project:
+Some design decisions made during development are listed below:
 
 - The MVC architecture was used to separate routing, business logic and database queries.
 - A junction table (`teacher_student`) is used because teachers and students have a many-to-many relationship.
 - Parameterized SQL queries (`?`) are used throughout the project to help prevent SQL injection.
 - Jest and Supertest were used to automate API testing.
-- The database is reset before every test to ensure that tests are independent and repeatable.
+- The database is reset before each test run so that every test starts with the same baseline data.
+
+---
 
 ## Testing
 
@@ -197,6 +286,18 @@ The automated tests cover:
 - Retrieving common students
 - Retrieving notification recipients
 
+---
+
+## Additional Notes
+
+A brief explanation of the project structure and implementation decisions can be found in:
+
+```
+CODE_EXPLANATION.md
+```
+
+---
+
 ## Author
 
-Developed by **Yohith V. Nyanasegaran**.
+Developed by **Yohith V. Nyanasegaran**
