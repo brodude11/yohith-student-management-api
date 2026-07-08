@@ -290,11 +290,10 @@ The automated tests cover:
 
 ## Additional Notes
 
-A brief explanation of the project structure and implementation decisions can be found in:
+The repository also includes the following documents:
 
-```
-CODE_EXPLANATION.md
-```
+- `CODE_EXPLANATION.md` - Brief explanation of the project structure and implementation decisions.
+- `UserStories_Testing_Report.pdf` - Manual testing performed against all API endpoints together with actual outputs.
 
 ---
 
