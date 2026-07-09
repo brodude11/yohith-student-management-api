@@ -16,7 +16,7 @@ const registerStudents = async (req, res) => { //asynce is used because need to 
 
         const { teacher, students } = req.body;
         // to validate request body
-        if (!teacher || !students || !Array.isArray(students)) {// to validate hte input is students are missing or not in an array
+        if (!teacher || !students || !Array.isArray(students)) {// to validate the input is students/teachers are missing or not in an array
 
             return res.status(400).json({
                 message: 'Invalid request body'
