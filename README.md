@@ -107,7 +107,7 @@ mysql -u root
 If you already have a `student_management` database from a previous setup, you can remove it first so that you start with a clean database.
 
 ```sql
-DROP DATABASE student_management;
+DROP DATABASE IF EXISTS student_management;
 ```
 
 Create the database:
